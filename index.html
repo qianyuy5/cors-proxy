@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CORS Playground</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a33;
+      --panel-2: #0f1730;
+      --text: #e8ecff;
+      --muted: #9aa4c2;
+      --line: rgba(255,255,255,.10);
+      --accent: #7c9cff;
+      --accent-2: #62e6c8;
+      --danger: #ff7b8a;
+      --shadow: 0 18px 50px rgba(0,0,0,.32);
+      --radius: 20px;
+      --radius-sm: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      --sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(124,156,255,.15), transparent 28%),
+        radial-gradient(circle at top right, rgba(98,230,200,.13), transparent 24%),
+        linear-gradient(180deg, #07101f 0%, #0b1020 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    header {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: -0.03em;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      max-width: 78ch;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      color: #dbe4ff;
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card .hd {
+      padding: 18px 18px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.02em;
+    }
+
+    .card .hint {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .content { padding: 18px; }
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .row {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 13px;
+      color: #cfd7f4;
+    }
+
+    input, select, textarea, button {
+      font: inherit;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(9, 15, 31, .75);
+      color: var(--text);
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(124,156,255,.7);
+      box-shadow: 0 0 0 4px rgba(124,156,255,.12);
+    }
+
+    textarea {
+      min-height: 160px;
+      resize: vertical;
+      font-family: var(--mono);
+      line-height: 1.5;
+      white-space: pre;
+    }
+
+    .two {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+    }
+
+    .btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      cursor: pointer;
+      color: #0b1020;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+
+    button.secondary {
+      background: rgba(255,255,255,.07);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px 14px;
+    }
+
+    .result {
+      display: grid;
+      gap: 12px;
+    }
+
+    .status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      padding: 8px 12px;
+      background: rgba(255,255,255,.04);
+      font-size: 13px;
+      color: #dbe4ff;
+    }
+
+    .pill.ok { color: #bff7e8; }
+    .pill.err { color: #ffb4be; }
+    .pill.warn { color: #ffe9a5; }
+
+    pre {
+      margin: 0;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(4, 8, 18, .85);
+      color: #dbe4ff;
+      padding: 14px;
+      overflow: auto;
+      max-height: 540px;
+      font-family: var(--mono);
+      line-height: 1.55;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .mini {
+      display: grid;
+      gap: 10px;
+    }
+
+    .kv {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .kv b { font-size: 13px; }
+    .kv span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 940px) {
+      .grid { grid-template-columns: 1fr; }
+      .two { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge">CORS Playground · ローカル用の検証UI</div>
+      <h1>CORS Anywhereっぽいフロントエンド</h1>
+      <p class="sub">
+        これはブラウザから直接CORSを魔法で消すものではありません。そんな便利すぎる話はたいてい裏にプロキシが要ります。
+        この画面は、そのプロキシにリクエストを投げるためのテスト用UIです。
+      </p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="hd">
+          <h2>リクエスト作成</h2>
+          <div class="hint">GET / POST / PUT / PATCH / DELETE</div>
+        </div>
+        <div class="content">
+          <div class="form">
+            <div class="row">
+              <label for="proxyBase">プロキシのベースURL</label>
+              <input id="proxyBase" type="text" value="http://localhost:8080/" placeholder="https://your-proxy.example/" />
+            </div>
+
+            <div class="row">
+              <label for="targetUrl">送信先URL</label>
+              <input id="targetUrl" type="url" value="https://example.com/" placeholder="https://api.example.com/data" />
+            </div>
+
+            <div class="two">
+              <div class="row">
+                <label for="method">HTTPメソッド</label>
+                <select id="method">
+                  <option>GET</option>
+                  <option>POST</option>
+                  <option>PUT</option>
+                  <option>PATCH</option>
+                  <option>DELETE</option>
+                </select>
+              </div>
+              <div class="row">
+                <label for="timeout">タイムアウト(ms)</label>
+                <input id="timeout" type="number" min="1000" step="500" value="12000" />
+              </div>
+            </div>
+
+            <div class="row">
+              <label for="headers">ヘッダー(JSON)</label>
+              <textarea id="headers">{
+  "Accept": "application/json"
+}</textarea>
+            </div>
+
+            <div class="row">
+              <label for="body">ボディ(任意, JSONやテキスト)</label>
+              <textarea id="body" placeholder="POST / PUT / PATCH のときに使います"></textarea>
+            </div>
+
+            <div class="btns">
+              <button id="sendBtn">送信する</button>
+              <button id="sampleBtn" class="secondary">サンプルを入れる</button>
+              <button id="clearBtn" class="secondary">結果を消す</button>
+            </div>
+
+            <div class="note">
+              想定しているプロキシ形式は、<span style="font-family:var(--mono)">/{target-url}</span> に中継するタイプです。
+              例えば <span style="font-family:var(--mono)">http://localhost:8080/https://api.example.com/data</span> のような形です。
+              実際のバックエンドの仕様に合わせて調整してください。
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd">
+          <h2>結果</h2>
+          <div class="hint">レスポンスをそのまま表示</div>
+        </div>
+        <div class="content result">
+          <div class="status">
+            <span id="statusPill" class="pill warn">待機中</span>
+            <span id="metaPill" class="pill">未送信</span>
+          </div>
+
+          <div class="mini">
+            <div class="kv">
+              <b>送信先</b>
+              <span id="builtUrl">-</span>
+            </div>
+            <div class="kv">
+              <b>最終ステータス</b>
+              <span id="statusText">-</span>
+            </div>
+          </div>
+
+          <pre id="output">ここにレスポンスが出ます。人類がまた一つ、便利そうなUIを作った気分になれる場所です。</pre>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      補足: このHTMLだけでは、別ドメインの制約を解除できません。CORS対策は通常、サーバー側で許可設定を行うか、同一オリジンのプロキシを使います。
+      これはその操作を試すためのフロントエンドです。
+    </div>
+  </div>
+
+  <script>
+    const els = {
+      proxyBase: document.getElementById('proxyBase'),
+      targetUrl: document.getElementById('targetUrl'),
+      method: document.getElementById('method'),
+      timeout: document.getElementById('timeout'),
+      headers: document.getElementById('headers'),
+      body: document.getElementById('body'),
+      sendBtn: document.getElementById('sendBtn'),
+      sampleBtn: document.getElementById('sampleBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      output: document.getElementById('output'),
+      statusPill: document.getElementById('statusPill'),
+      metaPill: document.getElementById('metaPill'),
+      builtUrl: document.getElementById('builtUrl'),
+      statusText: document.getElementById('statusText'),
+    };
+
+    function setStatus(kind, text) {
+      els.statusPill.className = 'pill ' + (kind || 'warn');
+      els.statusPill.textContent = text;
+    }
+
+    function safeJsonParse(value, fallback = {}) {
+      const text = value.trim();
+      if (!text) return fallback;
+      return JSON.parse(text);
+    }
+
+    function normalizeBase(url) {
+      return url.endsWith('/') ? url : url + '/';
+    }
+
+    function buildProxyUrl(base, target) {
+      return normalizeBase(base) + target;
+    }
+
+    function prettyHeaders(headersObj) {
+      const entries = Object.entries(headersObj || {});
+      if (!entries.length) return 'なし';
+      return entries.map(([k, v]) => `${k}: ${v}`).join('\n');
+    }
+
+    function updatePreview() {
+      const built = buildProxyUrl(els.proxyBase.value.trim(), els.targetUrl.value.trim());
+      els.builtUrl.textContent = built || '-';
+      els.metaPill.textContent = `${els.method.value} · ${els.timeout.value || '-'}ms`;
+    }
+
+    async function sendRequest() {
+      const proxyBase = els.proxyBase.value.trim();
+      const targetUrl = els.targetUrl.value.trim();
+      const method = els.method.value;
+      const timeoutMs = Math.max(1000, Number(els.timeout.value || 12000));
+      let headers = {};
+      let bodyText = els.body.value;
+
+      if (!proxyBase) {
+        setStatus('err', 'エラー');
+        els.statusText.textContent = 'プロキシのベースURLを入力してください。';
+        return;
+      }
+      if (!targetUrl) {
+        setStatus('err', 'エラー');
+        els.statusText.textContent = '送信先URLを入力してください。';
+        return;
+      }
+
+      try {
+        headers = safeJsonParse(els.headers.value, {});
+        if (headers === null || Array.isArray(headers) || typeof headers !== 'object') {
+          throw new Error('ヘッダーはJSONオブジェクトで入力してください。');
+        }
+      } catch (error) {
+        setStatus('err', 'ヘッダー不正');
+        els.statusText.textContent = error.message;
+        return;
+      }
+
+      const finalUrl = buildProxyUrl(proxyBase, targetUrl);
+      updatePreview();
+      setStatus('warn', '送信中');
+      els.statusText.textContent = 'リクエストを送信しています...';
+      els.output.textContent = 'Loading...';
+      els.sendBtn.disabled = true;
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+      try {
+        const init = {
+          method,
+          headers,
+          signal: controller.signal,
+        };
+
+        if (method !== 'GET' && method !== 'HEAD' && bodyText.trim()) {
+          init.body = bodyText;
+        }
+
+        const res = await fetch(finalUrl, init);
+        const contentType = res.headers.get('content-type') || '';
+        let payload;
+
+        if (contentType.includes('application/json')) {
+          payload = JSON.stringify(await res.json(), null, 2);
+        } else {
+          payload = await res.text();
+        }
+
+        clearTimeout(timer);
+        setStatus(res.ok ? 'ok' : 'err', res.ok ? '成功' : 'HTTPエラー');
+        els.statusText.textContent = `Status ${res.status} ${res.statusText}`;
+        els.output.textContent = [
+          `URL: ${finalUrl}`,
+          `Status: ${res.status} ${res.statusText}`,
+          `Content-Type: ${contentType || '(none)'}`,
+          '',
+          payload || '(empty response)',
+        ].join('\n');
+      } catch (error) {
+        clearTimeout(timer);
+        setStatus('err', error.name === 'AbortError' ? 'タイムアウト' : '失敗');
+        els.statusText.textContent = error.name === 'AbortError'
+          ? `指定時間内に応答がありませんでした (${timeoutMs}ms)`
+          : error.message;
+        els.output.textContent = [
+          `URL: ${finalUrl}`,
+          `Method: ${method}`,
+          '',
+          'Error:',
+          error.stack || error.message,
+        ].join('\n');
+      } finally {
+        els.sendBtn.disabled = false;
+        updatePreview();
+      }
+    }
+
+    function fillSample() {
+      els.proxyBase.value = 'http://localhost:8080/';
+      els.targetUrl.value = 'https://jsonplaceholder.typicode.com/todos/1';
+      els.method.value = 'GET';
+      els.timeout.value = 12000;
+      els.headers.value = JSON.stringify({
+        Accept: 'application/json'
+      }, null, 2);
+      els.body.value = '';
+      updatePreview();
+      setStatus('warn', 'サンプル');
+      els.statusText.textContent = 'サンプルを読み込みました。';
+      els.output.textContent = '送信ボタンを押すと、プロキシ経由でレスポンスを確認できます。';
+    }
+
+    function clearOutput() {
+      setStatus('warn', '待機中');
+      els.metaPill.textContent = '未送信';
+      els.statusText.textContent = '-';
+      els.output.textContent = 'ここにレスポンスが出ます。';
+    }
+
+    ['input', 'change'].forEach(evt => {
+      els.proxyBase.addEventListener(evt, updatePreview);
+      els.targetUrl.addEventListener(evt, updatePreview);
+      els.method.addEventListener(evt, updatePreview);
+      els.timeout.addEventListener(evt, updatePreview);
+    });
+
+    els.sendBtn.addEventListener('click', sendRequest);
+    els.sampleBtn.addEventListener('click', fillSample);
+    els.clearBtn.addEventListener('click', clearOutput);
+
+    updatePreview();
+  </script>
+</body>
+</html>
