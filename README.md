@@ -1,96 +1,126 @@
-# CORS Playground (Frontend Only Demo)
 
-This project is a **frontend-only request testing UI**. It simulates how a CORS proxy tool would look, but **does not include any backend server or proxy functionality**.
+# CORS Proxy (Express)
 
-In other words: it looks powerful, but it currently has no actual authority.
+シンプルなCORSプロキシサーバーです。
+フロントエンドから外部APIにアクセスするための“とりあえず動けばいい”実装。
 
-## Features
+## 🚀 Features
 
-* HTTP request builder (GET, POST, PUT, PATCH, DELETE)
-* Custom headers input (JSON format)
-* Request body support
-* Response viewer UI
-* Timeout simulation logic
-* Proxy URL input (for future backend use)
+* 任意URLへのリクエスト転送
+* CORSフル許可（雑に全部通す）
+* GET / POST / PUT / DELETE 対応
+* 軽量 Express ベース
 
-## Important Reality Check
+---
 
-This project:
+## ⚠️ Warning
 
-* ❌ Does NOT bypass CORS
-* ❌ Does NOT include a proxy server
-* ❌ Does NOT modify browser security rules
+このプロジェクトは**開発用途専用**です。
 
-Right now it is just a **UI + request simulator**.
+* SSRF対策なし
+* 認証なし
+* 制限なし
+* つまり「インターネットの穴」
 
-If you try to use it against real cross-origin APIs, the browser will politely refuse (as it should).
+本番環境に置くと、だいたい後悔します。
 
-## How It Currently Works
+---
 
-Since there is no backend, you have two options:
-
-### 1. Mock / Local Testing
-
-You can use it as a UI tool only, for example:
-
-* Designing API request flows
-* Preparing payloads
-* Debugging request structure
-
-### 2. Future Upgrade Path
-
-If you want real cross-origin requests, you need to add a backend proxy such as:
-
-* Node.js + Express proxy server
-* `cors-anywhere` clone
-* nginx reverse proxy
-
-Then update the proxy base URL field in the UI.
-
-## How to Use
-
-### 1. Open the file
-
-Open `index.html` directly in your browser or deploy via GitHub Pages.
-
-### 2. Fill request fields
-
-* Target URL (API endpoint)
-* HTTP method
-* Headers (JSON)
-* Optional body
-
-### 3. Click Send
-
-It will attempt a fetch request, but only same-origin or CORS-allowed APIs will succeed.
-
-## Example Target (works without backend)
-
-```
-https://jsonplaceholder.typicode.com/todos/1
+## 📦 Install
+```bash
+git clone https://github.com/qianyuy5/cors-proxy.git
+cd cors-proxy
+npm install
 ```
 
-## GitHub Pages Deployment
+---
 
-You can still host this UI on GitHub Pages:
+## ▶️ Run
 
-1. Push repo to GitHub
-2. Ensure `index.html` exists in root
-3. Enable GitHub Pages (main branch / root)
-4. Open generated URL
+```bash
+node index.js
+```
 
-## Limitations
+または（ESMの場合）:
 
-* No backend = no proxy
-* CORS restrictions fully apply
-* Proxy field is currently decorative
+```bash
+node --experimental-modules index.js
+```
 
-## Summary
+サーバーはデフォルトで:
 
-This is a **request UI simulator pretending to be a proxy tool**, waiting for a backend to give it meaning.
+```
+http://localhost:3000
+```
 
-Until then, it is mostly vibes and buttons.
+---
 
-## License
+## 🔧 Usage
 
-MIT (or whatever you f
+### Proxy Request
+
+```http
+GET /proxy?url=https://example.com
+```
+
+### Example
+
+```bash
+curl "http://localhost:3000/proxy?url=https://api.github.com"
+```
+
+---
+
+## 🧠 How it works
+
+1. クライアントが `/proxy?url=...` にアクセス
+2. サーバーが指定URLへリクエストを転送
+3. 返ってきたレスポンスをそのまま返す
+4. CORSヘッダを全部許可してフロントから見えるようにする
+
+以上。思想は「全部通す」。
+
+---
+
+## 🔒 Security Notes
+
+もしこれを本番で使おうとしているなら：
+
+* IP制限を入れろ
+* URLホワイトリストを入れろ
+* private networkアクセスをブロックしろ
+* rate limit を入れろ
+
+入れないなら、このプロジェクトは実質「攻撃ツール」です。
+
+---
+
+## 🧱 Tech Stack
+
+* Node.js
+* Express
+* node-fetch（または native fetch）
+
+---
+
+## 📁 Project Structure
+
+```
+.
+├── index.js
+├── package.json
+└── README.md
+```
+
+---
+
+## 🧭 License
+
+好きにしていいけど、責任は取らないタイプのやつ。
+
+---
+
+## 🧷 About GitHub
+
+このプロジェクトは GitHub 上で公開する想定です。
+[GitHub](https://github.com?utm_source=chatgpt.com)
