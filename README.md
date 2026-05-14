@@ -28,7 +28,7 @@
 
 ## 📦 Install
 ```bash
-git clone https://github.com/qianyuy5/cors-proxy.git
+git clone https://github.com/qianyu-08/cors-proxy.git
 cd cors-proxy
 npm install
 ```
